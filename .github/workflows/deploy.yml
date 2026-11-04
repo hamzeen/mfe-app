@@ -27,11 +27,32 @@ jobs:
               with:
                   node-version: 24
                   cache: npm
-            - uses: actions/checkout@v4
-              with:
-                  ref: mfe-releases
-                  path: remote-archive
-              continue-on-error: true
+            - id: restore_archive
+              name: Restore immutable remote archive
+              shell: bash
+              run: |
+                  set +e
+                  git ls-remote --exit-code --heads origin refs/heads/mfe-releases >/dev/null
+                  archive_status=$?
+                  set -e
+
+                  mkdir -p remote-archive
+                  if [ "$archive_status" -eq 0 ]; then
+                    git fetch --no-tags origin refs/heads/mfe-releases
+                    git archive --format=tar FETCH_HEAD mfes | tar -xf - -C remote-archive
+                    if [ ! -d remote-archive/mfes ] || [ -z "$(find remote-archive/mfes -mindepth 1 -maxdepth 1 -type d -print -quit)" ]; then
+                      echo "The mfe-releases branch exists but contains no remote archive." >&2
+                      exit 1
+                    fi
+                    echo "initialized=true" >> "$GITHUB_OUTPUT"
+                  elif [ "$archive_status" -eq 2 ]; then
+                    mkdir -p remote-archive/mfes
+                    echo "initialized=false" >> "$GITHUB_OUTPUT"
+                    echo "No mfe-releases branch exists; initializing the archive on this deployment."
+                  else
+                    echo "Could not check the mfe-releases branch (git ls-remote exit $archive_status)." >&2
+                    exit "$archive_status"
+                  fi
             - run: npm ci
             - run: npx playwright install --with-deps chromium
             - run: npm run typecheck
@@ -39,11 +60,13 @@ jobs:
               env:
                   VITE_BASE_PATH: /mfe-app/
                   REMOTE_ARCHIVE_DIR: remote-archive/mfes
+                  REMOTE_ARCHIVE_INITIALIZED: ${{ steps.restore_archive.outputs.initialized }}
             - run: npm run test:e2e
             - run: npm run test:production
               env:
                   VITE_BASE_PATH: /mfe-app/
                   REMOTE_ARCHIVE_DIR: remote-archive/mfes
+                  REMOTE_ARCHIVE_INITIALIZED: ${{ steps.restore_archive.outputs.initialized }}
             - uses: peaceiris/actions-gh-pages@v4
               if: github.event_name != 'pull_request'
               with:

@@ -1,4 +1,4 @@
-import { cp, copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { access, cp, copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -13,22 +13,44 @@ const releaseId = (
 const apps = ["home-angular", "about-react"];
 const outputReleases = resolve(root, "dist/shell/mfes");
 const archiveReleases = process.env.REMOTE_ARCHIVE_DIR;
+const allowEmptyArchive = process.env.REMOTE_ARCHIVE_INITIALIZED === "false";
 
 if (archiveReleases) {
+    let archivedEntries;
     try {
-        const archivedEntries = await readdir(archiveReleases);
-        await mkdir(outputReleases, { recursive: true });
-        for (const entry of archivedEntries) {
-            await cp(resolve(archiveReleases, entry), resolve(outputReleases, entry), {
-                recursive: true,
-                force: false,
-                errorOnExist: false,
+        archivedEntries = await readdir(archiveReleases, { withFileTypes: true });
+    } catch (error) {
+        if (error?.code !== "ENOENT" || !allowEmptyArchive) {
+            throw new Error(`Could not restore remote archive at ${archiveReleases}`, {
+                cause: error,
             });
         }
-        console.log(`Restored ${archivedEntries.length} archived remote release directories.`);
-    } catch (error) {
-        if (error?.code !== "ENOENT") throw error;
+        archivedEntries = [];
     }
+
+    if (!archivedEntries.length && !allowEmptyArchive) {
+        throw new Error(
+            `Remote archive at ${archiveReleases} is empty; refusing to publish without retained releases.`,
+        );
+    }
+
+    await mkdir(outputReleases, { recursive: true });
+    for (const entry of archivedEntries) {
+        if (!entry.isDirectory()) {
+            throw new Error(`Invalid entry in remote archive: ${entry.name}`);
+        }
+        const archivedRelease = resolve(archiveReleases, entry.name);
+        for (const app of apps) {
+            await access(resolve(archivedRelease, app, "entry.js"));
+            await access(resolve(archivedRelease, app, "entry.js.map"));
+        }
+        await cp(archivedRelease, resolve(outputReleases, entry.name), {
+            recursive: true,
+            force: false,
+            errorOnExist: false,
+        });
+    }
+    console.log(`Restored ${archivedEntries.length} archived remote release directories.`);
 }
 
 for (const app of apps) {
