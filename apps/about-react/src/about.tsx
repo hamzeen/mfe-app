@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { EVENTS, subscribe } from "@mfe/utils";
 
-export function About() {
+export function About({ onReady }: { onReady: () => void }) {
     const [sessionNote, setSessionNote] = useState(
         () => sessionStorage.getItem("mfe-demo-session") ?? "Northstar workspace",
     );
@@ -16,12 +16,13 @@ export function About() {
             setTheme(theme),
         );
         const intervalId = window.setInterval(() => setUptime((value) => value + 1), 1000);
+        onReady();
         return () => {
             disposeSession();
             disposeTheme();
             window.clearInterval(intervalId);
         };
-    }, []);
+    }, [onReady]);
 
     return (
         <main className="about-mfe" data-mfe="about-react" aria-labelledby="about-title">

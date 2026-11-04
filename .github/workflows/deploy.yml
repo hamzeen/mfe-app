@@ -7,7 +7,7 @@ on:
     workflow_dispatch:
 
 permissions:
-    contents: read
+    contents: write
     pages: write
     id-token: write
 
@@ -27,16 +27,31 @@ jobs:
               with:
                   node-version: 24
                   cache: npm
+            - uses: actions/checkout@v4
+              with:
+                  ref: mfe-releases
+                  path: remote-archive
+              continue-on-error: true
             - run: npm ci
             - run: npx playwright install --with-deps chromium
             - run: npm run typecheck
             - run: npm run build
               env:
                   VITE_BASE_PATH: /mfe-app/
+                  REMOTE_ARCHIVE_DIR: remote-archive/mfes
             - run: npm run test:e2e
             - run: npm run test:production
               env:
                   VITE_BASE_PATH: /mfe-app/
+                  REMOTE_ARCHIVE_DIR: remote-archive/mfes
+            - uses: peaceiris/actions-gh-pages@v4
+              if: github.event_name != 'pull_request'
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_branch: mfe-releases
+                  publish_dir: dist/shell/mfes
+                  destination_dir: mfes
+                  keep_files: true
             - uses: actions/configure-pages@v5
               if: github.event_name != 'pull_request'
             - uses: actions/upload-pages-artifact@v3

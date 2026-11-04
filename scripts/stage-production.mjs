@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -11,9 +11,28 @@ const releaseId = (
     Date.now().toString(36)
 ).replace(/[^a-zA-Z0-9._-]/g, "");
 const apps = ["home-angular", "about-react"];
+const outputReleases = resolve(root, "dist/shell/mfes");
+const archiveReleases = process.env.REMOTE_ARCHIVE_DIR;
+
+if (archiveReleases) {
+    try {
+        const archivedEntries = await readdir(archiveReleases);
+        await mkdir(outputReleases, { recursive: true });
+        for (const entry of archivedEntries) {
+            await cp(resolve(archiveReleases, entry), resolve(outputReleases, entry), {
+                recursive: true,
+                force: false,
+                errorOnExist: false,
+            });
+        }
+        console.log(`Restored ${archivedEntries.length} archived remote release directories.`);
+    } catch (error) {
+        if (error?.code !== "ENOENT") throw error;
+    }
+}
 
 for (const app of apps) {
-    const outputDirectory = resolve(root, "dist/shell/mfes", releaseId, app);
+    const outputDirectory = resolve(outputReleases, releaseId, app);
     await mkdir(outputDirectory, { recursive: true });
     await copyFile(
         resolve(root, `dist/mfes/${app}/entry.js`),

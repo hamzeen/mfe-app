@@ -82,3 +82,26 @@ test("a failed remote leaves navigation usable and retries cleanly", async ({ pa
     expect(remoteRequests).toHaveLength(2);
     expect(remoteRequests[1]).toContain("mfe-retry=1");
 });
+
+test("React render errors are reported and do not emit ready", async ({ page }) => {
+    test.skip(production, "This test injects an error into the Vite-served React source.");
+    let injected = false;
+    await page.route("**/src/about.tsx*", async (route) => {
+        if (injected) {
+            await route.continue();
+            return;
+        }
+        injected = true;
+        const response = await route.fetch();
+        const source = (await response.text()).replace(
+            "export function About({ onReady }) {",
+            'export function About({ onReady }) { throw new Error("forced React render failure");',
+        );
+        await route.fulfill({ response, body: source });
+    });
+
+    await page.goto(routeUrl("/about"));
+    await expect(page.getByRole("alert")).toContainText("forced React render failure");
+    await expect(page.locator(".runtime-pill")).toHaveText(/Frontend unavailable/);
+    await expect(page.locator('[data-mfe="about-react"]')).toHaveCount(0);
+});

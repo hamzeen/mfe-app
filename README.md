@@ -26,6 +26,8 @@ npm run publish:remote -- about-react release-42
 
 The command copies the new bundle under `dist/shell/mfes/release-42/about-react/`, then updates only `dist/shell/runtime-importmap.json`. Upload the new remote directory and that JSON file to their static hosts; no shell rebuild is involved. Keep old versioned bundle URLs available during the rollout; rollback is changing the import-map URL back to the prior release. The import-map response uses `cache: no-store`; remote URLs include a release query and should use immutable caching when they are versioned. Do not overwrite a versioned URL.
 
+The Pages workflow stores immutable bundles on the `mfe-releases` branch. Before each clean build it restores that archive into the Pages artifact, stages the new bundles, publishes the archive branch first, then deploys the site with the updated runtime import map. Existing clients holding an older map can still fetch their version after a deployment; rollback can point the map to a retained release. The first workflow run creates the archive branch.
+
 ## Independent origins and assets
 
 Vite's development and preview servers enable CORS. For a separately hosted production remote, serve JavaScript with a JavaScript content type and `Access-Control-Allow-Origin` for the shell origin (or `*` for public, credential-free bundles). Native ESM imports enforce CORS. The current remotes inline their small styles and have no external asset dependencies; for future assets, use URLs rooted at the remote origin (for example `new URL('./image.webp', import.meta.url)`) rather than shell-relative paths. Publish those files alongside the remote and apply the same CORS policy.
@@ -50,4 +52,4 @@ For production split hosting, publish shell and each remote to static origins in
 
 The shell persists a tab-scoped workspace note in `sessionStorage` and broadcasts `shell:session-changed`; both frontends render it and unsubscribe on unmount. Theme state is shell-owned, stored in `localStorage`, and broadcast through `shell:theme-changed`. The verification loop is intentionally bounded to six Home/About round trips plus one direct-route, history, failure, and production pass; CI retries a failed job once, rather than retrying an application loop indefinitely.
 
-Each MFE exports `bootstrap`, `mount`, and `unmount`. React tears down its root, event subscription, interval, and injected styles. Angular destroys its component/application; the component clears its subscription and interval.
+Each MFE exports `bootstrap`, `mount`, and `unmount`. React tears down its root, event subscription, interval, and injected styles. Its `ready` event is emitted from an effect after commit; a React error boundary reports asynchronous render errors to the shell, which keeps navigation available. Angular destroys its component/application; the component clears its subscription and interval.
