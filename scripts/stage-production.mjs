@@ -40,9 +40,23 @@ if (archiveReleases) {
             throw new Error(`Invalid entry in remote archive: ${entry.name}`);
         }
         const archivedRelease = resolve(archiveReleases, entry.name);
+        const archivedApps = await readdir(archivedRelease, { withFileTypes: true });
+        let validatedApps = 0;
         for (const app of apps) {
+            const appDirectory = archivedApps.find((candidate) => candidate.name === app);
+            if (!appDirectory) continue;
+            if (!appDirectory.isDirectory()) {
+                throw new Error(`Invalid archived frontend directory: ${entry.name}/${app}`);
+            }
             await access(resolve(archivedRelease, app, "entry.js"));
             await access(resolve(archivedRelease, app, "entry.js.map"));
+            validatedApps += 1;
+        }
+        if (
+            validatedApps === 0 ||
+            archivedApps.some((candidate) => !apps.includes(candidate.name))
+        ) {
+            throw new Error(`Invalid remote release archive directory: ${entry.name}`);
         }
         await cp(archivedRelease, resolve(outputReleases, entry.name), {
             recursive: true,

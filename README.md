@@ -26,7 +26,16 @@ npm run publish:remote -- about-react release-42
 
 The command copies the new bundle under `dist/shell/mfes/release-42/about-react/`, then updates only `dist/shell/runtime-importmap.json`. Upload the new remote directory and that JSON file to their static hosts; no shell rebuild is involved. Keep old versioned bundle URLs available during the rollout; rollback is changing the import-map URL back to the prior release. The import-map response uses `cache: no-store`; remote URLs include a release query and should use immutable caching when they are versioned. Do not overwrite a versioned URL.
 
-The Pages workflow stores immutable bundles on the `mfe-releases` branch. Before each clean build it restores that archive into the Pages artifact, stages the new bundles, publishes the archive branch first, then deploys the site with the updated runtime import map. Existing clients holding an older map can still fetch their version after a deployment; rollback can point the map to a retained release. Only an explicitly detected missing branch permits first-run initialization. Fetch, authentication, missing-directory, empty-archive, or incomplete-release errors fail the workflow before site publication.
+The Pages workflow stores immutable bundles on the `mfe-releases` branch. Before each clean build it restores that archive into the Pages artifact, stages the new bundles, publishes the archive branch first, then deploys the site with the updated runtime import map. Archive release directories may contain one frontend or both; each included frontend must have its JavaScript and source map, and an empty release directory is rejected. Existing clients holding an older map can still fetch their version after a deployment; rollback can point the map to a retained release. Only an explicitly detected missing branch permits first-run initialization. Fetch, authentication, missing-directory, empty-archive, or incomplete-release errors fail the workflow before site publication.
+
+An About-only release builds and publishes just React, updates only the About import-map entry, and leaves shell assets and Home's URL untouched:
+
+```sh
+npm run build:about
+VITE_BASE_PATH=/mfe-app/ npm run publish:remote -- about-react release-43
+```
+
+Publish the resulting `dist/shell/mfes/release-43/` directory to the `mfe-releases` branch under `mfes/`, then publish the updated `dist/shell/runtime-importmap.json` as runtime configuration. No shell rebuild is required.
 
 ## Independent origins and assets
 
