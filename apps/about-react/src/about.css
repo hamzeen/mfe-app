@@ -1,0 +1,137 @@
+.about-mfe {
+    min-height: 270px;
+    padding: 24px 26px 19px;
+    color: var(--ink);
+}
+
+.about-kicker,
+.about-bottomline {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.framework-tag {
+    color: var(--brand);
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 205px;
+    align-items: center;
+    gap: 34px;
+    padding: 27px 0 25px;
+}
+
+.about-label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.1px;
+}
+
+.about-grid h1 {
+    margin: 11px 0 12px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 400;
+    line-height: 1;
+}
+
+.about-grid h1 em {
+    color: var(--brand);
+    font-weight: 400;
+}
+
+.about-copy {
+    max-width: 480px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.about-runtime {
+    min-height: 132px;
+    padding: 14px;
+    border-left: 2px solid var(--accent);
+    background: var(--surface-quiet);
+}
+
+.about-note-index,
+.about-counter {
+    display: block;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.about-runtime strong {
+    display: block;
+    margin-top: 12px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    font-weight: 400;
+}
+
+.about-shared-note {
+    min-height: 16px;
+    overflow-wrap: anywhere;
+    margin: 4px 0 11px;
+    color: var(--brand);
+    font-size: 11px;
+}
+
+.about-note-rule {
+    display: block;
+    height: 1px;
+    margin-bottom: 9px;
+    background: var(--line);
+}
+
+.about-counter b {
+    float: right;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.about-theme-value {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.about-bottomline {
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 8px;
+}
+
+@media (max-width: 600px) {
+    .about-mfe {
+        padding: 18px 16px;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 22px 0;
+    }
+
+    .about-runtime {
+        min-height: 0;
+    }
+
+    .about-bottomline {
+        flex-wrap: wrap;
+    }
+}

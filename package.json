@@ -1,0 +1,35 @@
+{
+    "name": "client-side-mfe-lab",
+    "private": true,
+    "type": "module",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "concurrently -k -n shell,home,about -c cyan,green,magenta \"npm:dev:shell\" \"npm:dev:home\" \"npm:dev:about\"",
+        "dev:shell": "vite --config apps/shell/vite.config.ts --host 0.0.0.0 --port 5173 --strictPort",
+        "dev:home": "vite --config apps/home-angular/vite.config.ts --host 0.0.0.0 --port 4174 --strictPort",
+        "dev:about": "vite --config apps/about-react/vite.config.ts --host 0.0.0.0 --port 4175 --strictPort",
+        "build": "npm run build:home && npm run build:about && npm run build:shell && npm run stage:production",
+        "build:home": "npm run build --workspace @mfe/home-angular",
+        "build:about": "npm run build --workspace @mfe/about-react",
+        "build:shell": "npm run build --workspace @mfe/shell",
+        "stage:production": "node scripts/stage-production.mjs",
+        "publish:remote": "node scripts/publish-remote.mjs",
+        "preview:production": "vite preview --config apps/shell/vite.config.ts --host 127.0.0.1 --port 5180 --strictPort",
+        "test:e2e": "playwright test",
+        "test:production": "npm run build && MFE_PRODUCTION=1 playwright test",
+        "check": "npm run build && npm run test:e2e",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.55.0",
+        "@types/node": "^22.15.0",
+        "@types/react": "^18.3.18",
+        "@types/react-dom": "^18.3.5",
+        "concurrently": "^9.1.2",
+        "typescript": "~5.8.3",
+        "vite": "^6.4.1"
+    }
+}

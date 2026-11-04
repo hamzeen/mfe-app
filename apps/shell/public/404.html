@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <script>
+            const basePath = "__MFE_BASE_PATH__";
+            sessionStorage.setItem(
+                "mfe:github-pages-path",
+                location.pathname + location.search + location.hash,
+            );
+            location.replace(basePath);
+        </script>
+    </head>
+    <body></body>
+</html>

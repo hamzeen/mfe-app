@@ -1,0 +1,16 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../../dist/types/home-angular",
+        "noEmit": false,
+        "allowImportingTsExtensions": false,
+        "experimentalDecorators": true,
+        "useDefineForClassFields": false
+    },
+    "angularCompilerOptions": {
+        "strictTemplates": true,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true
+    },
+    "include": ["src/**/*.ts"]
+}

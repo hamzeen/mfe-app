@@ -1,0 +1,53 @@
+:root {
+    color-scheme: light;
+    --page: #f6f7f2;
+    --surface: #ffffff;
+    --surface-quiet: #e9eee7;
+    --ink: #152522;
+    --muted: #62706b;
+    --line: #d3ddd4;
+    --brand: #145b49;
+    --brand-strong: #0b4435;
+    --accent: #c6e86b;
+    --danger: #b94a36;
+    --focus: #e06c50;
+    font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #101b18;
+    --surface: #182622;
+    --surface-quiet: #22342e;
+    --ink: #edf4ec;
+    --muted: #a7b9ae;
+    --line: #344b40;
+    --brand: #9bd6b8;
+    --brand-strong: #c1e8d2;
+    --accent: #c6e86b;
+    --danger: #ff9a82;
+    --focus: #ffc0a8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 320px;
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+}

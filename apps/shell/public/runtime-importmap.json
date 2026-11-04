@@ -1,0 +1,6 @@
+{
+    "imports": {
+        "@mfe/home-angular": "http://localhost:4174/src/single-spa.ts",
+        "@mfe/about-react": "http://localhost:4175/src/single-spa.tsx"
+    }
+}

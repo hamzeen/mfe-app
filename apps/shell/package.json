@@ -1,0 +1,16 @@
+{
+    "name": "@mfe/shell",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build --config vite.config.ts"
+    },
+    "dependencies": {
+        "@mfe/contracts": "1.0.0",
+        "@mfe/tokens": "1.0.0",
+        "@mfe/utils": "1.0.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "single-spa": "^6.0.3"
+    }
+}
